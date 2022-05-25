@@ -1,0 +1,72 @@
+params:
+- train
+- --help
+output:
+  exit_code: 0
+  stdout: |
+    Usage: base-callback train [OPTIONS]
+
+    Options:
+      --distributed / --no-distributed
+                                      If the learner is distributed.  [default: no-
+                                      distributed]
+      --fp16 / --no-fp16              Whether or not the floating-point precision of
+                                      learner should be set to 16 bit.  [default:
+                                      fp16]
+      --output-dir PATH               The location of the output directory.
+                                      [default: ./outputs]
+      --csv PATH                      A CSV with image paths and the text to read.
+      --image-column TEXT             The name of the column with the image paths.
+                                      [default: image]
+      --text-column TEXT              The name of the column with the text of the
+                                      image.  [default: text]
+      --base-dir PATH                 The base directory for images with relative
+                                      paths. If empty, then paths are relative to
+                                      the CSV file.
+      --validation-column TEXT        The column in the dataset to use for
+                                      validation. If the column is not in the
+                                      dataset, then a validation set will be chosen
+                                      randomly according to `validation_proportion`.
+                                      [default: validation]
+      --validation-proportion FLOAT   The proportion of the dataset to keep for
+                                      validation. Used if `validation_column` is not
+                                      in the dataset.  [default: 0.2]
+      --batch-size INTEGER            The number of items to use in each batch.
+                                      [default: 16]
+      --width INTEGER                 The width to resize all the images to.
+                                      [default: 224]
+      --height INTEGER                The height to resize all the images to.
+                                      [default: 224]
+      --resize-method TEXT            The method to resize images.  [default:
+                                      squish]
+      --epochs INTEGER                The number of epochs.  [default: 20]
+      --freeze-epochs INTEGER         The number of epochs to train when the learner
+                                      is frozen and the last layer is trained by
+                                      itself. Only if `fine_tune` is set on the app.
+                                      [default: 3]
+      --learning-rate FLOAT           The base learning rate (when fine tuning) or
+                                      the max learning rate otherwise.  [default:
+                                      0.0001]
+      --project-name TEXT             The name for this project for logging
+                                      purposes.
+      --run-name TEXT                 The name for this particular run for logging
+                                      purposes.
+      --notes TEXT                    A longer description of the run for logging
+                                      purposes.
+      --tag TEXT                      A tag for logging purposes. Multiple tags can
+                                      be added each introduced with --tag.
+      --wandb / --no-wandb            Whether or not to use 'Weights and Biases' for
+                                      logging.  [default: no-wandb]
+      --wandb-mode TEXT               The mode for 'Weights and Biases'.  [default:
+                                      online]
+      --wandb-dir PATH                The location for 'Weights and Biases' output.
+      --wandb-entity TEXT             An entity is a username or team name where
+                                      you're sending runs.
+      --wandb-group TEXT              Specify a group to organize individual runs
+                                      into a larger experiment.
+      --wandb-job-type TEXT           Specify the type of run, which is useful when
+                                      you're grouping runs together into larger
+                                      experiments using group.
+      --mlflow / --no-mlflow          Whether or not to use MLflow for logging.
+                                      [default: no-mlflow]
+      --help                          Show this message and exit.
