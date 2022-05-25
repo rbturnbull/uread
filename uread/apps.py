@@ -8,18 +8,26 @@ from fastai.data.transforms import ColReader, ColSplitter, RandomSplitter
 from fastai.metrics import accuracy
 from fastai.vision.data import ImageBlock
 from fastai.vision.augment import Resize, ResizeMethod
+from fastai.callback.hook import num_features_model
+from fastai.vision.learner import create_body
 
 import pandas as pd
 import fastapp as fa
 from fastapp.vision import VisionApp
 from fastapp.examples.image_classifier import PathColReader
+from torchvision import models
 
 from .transforms import CharBlock
+from .modules import CharDecoder
+
 
 console = Console()
 
 
 class Uread(fa.FastApp):
+    def __init__(self):
+        super().__init__()
+        self.vocab_size = 28
 
     def dataloaders(
         self,
@@ -28,7 +36,7 @@ class Uread(fa.FastApp):
         text_column: str = fa.Param(
             default="text", help="The name of the column with the text of the image."
         ),
-        base_dir: Path = fa.Param(default="./", help="The base directory for images with relative paths."),
+        base_dir: Path = fa.Param(default=None, help="The base directory for images with relative paths. If empty, then paths are relative to the CSV file."),
         validation_column: str = fa.Param(
             default="validation", 
             help="The column in the dataset to use for validation. "
@@ -45,6 +53,9 @@ class Uread(fa.FastApp):
     ):
         df = pd.read_csv(csv)
 
+        if not base_dir:
+            base_dir = Path(csv).parent
+
         # Create splitter for training/validation images
         if validation_column and validation_column in df:
             splitter = ColSplitter(validation_column)
@@ -59,7 +70,10 @@ class Uread(fa.FastApp):
             item_tfms=Resize( (height, width), method=resize_method ),
         )
 
-        return datablock.dataloaders(df, bs=batch_size)
+        # add normalisation
+
+        dataloaders = datablock.dataloaders(df, bs=batch_size)
+        return dataloaders
 
     def model(
         self,
@@ -70,8 +84,13 @@ class Uread(fa.FastApp):
         Returns:
             nn.Module: The created model.
         """
-        raise NotImplemented("Model function not implemented yet.") 
+        encoder = create_body(models.resnet18)
+        features = num_features_model(encoder)
+        decoder = CharDecoder(input_size=features, vocab_size=self.vocab_size)
+
         return nn.Sequential(
+            encoder,
+            decoder,
         )
 
     def metrics(self):
@@ -79,3 +98,6 @@ class Uread(fa.FastApp):
 
     def monitor(self):
         return "accuracy"
+
+    def loss_func(self):
+        return nn.CrossEntropyLoss()
