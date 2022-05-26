@@ -27,7 +27,7 @@ console = Console()
 class Uread(fa.FastApp):
     def __init__(self):
         super().__init__()
-        self.vocab = list("<abcdefghijklmnopqrstuvwxyz>")
+        self.vocab = list("_<abcdefghijklmnopqrstuvwxyz>")
 
     def dataloaders(
         self,
@@ -71,8 +71,11 @@ class Uread(fa.FastApp):
         )
 
         # add normalisation
+        import pdb; pdb.set_trace()
 
         dataloaders = datablock.dataloaders(df, bs=batch_size)
+
+
         return dataloaders
 
     def model(
@@ -103,4 +106,4 @@ class Uread(fa.FastApp):
         return "accuracy"
 
     def loss_func(self):
-        return nn.CrossEntropyLoss()
+        return nn.NLLLoss()
