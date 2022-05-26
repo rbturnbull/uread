@@ -8,7 +8,7 @@ from fastcore.meta import delegates
 class CharTokenizer(DisplayedTransform):
     input_types = (str,)
     def encodes(self, object:str): 
-        return ["<"] + list(object) + [">"]
+        return ["<"] + list(object.lower()) + [">"]
 
     def decodes(self, object): 
         return TitledStr("".join(object))
@@ -18,6 +18,7 @@ class CharBlock(TransformBlock):
     "A `TransformBlock` for individual characters"
     @delegates(Numericalize.__init__)
     def __init__(self, vocab=None, seq_len=72, **kwargs):
+        import pdb ; pdb.set_trace()
         type_tfms = [CharTokenizer(), Numericalize(vocab, **kwargs)]
         return super().__init__(
             type_tfms=type_tfms,

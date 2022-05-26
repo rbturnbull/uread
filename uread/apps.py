@@ -9,7 +9,7 @@ from fastai.metrics import accuracy
 from fastai.vision.data import ImageBlock
 from fastai.vision.augment import Resize, ResizeMethod
 from fastai.callback.hook import num_features_model
-from fastai.vision.learner import create_body
+from fastai.vision.learner import create_body, create_cnn_model
 
 import pandas as pd
 import fastapp as fa
@@ -27,7 +27,7 @@ console = Console()
 class Uread(fa.FastApp):
     def __init__(self):
         super().__init__()
-        self.vocab_size = 28
+        self.vocab = list("<abcdefghijklmnopqrstuvwxyz>")
 
     def dataloaders(
         self,
@@ -63,7 +63,7 @@ class Uread(fa.FastApp):
             splitter = RandomSplitter(validation_proportion)
 
         datablock = DataBlock(
-            blocks=[ImageBlock, CharBlock],
+            blocks=[ImageBlock, CharBlock(vocab=self.vocab)],
             get_x=PathColReader(column_name=image_column, base_dir=base_dir),
             get_y=ColReader(text_column),
             splitter=splitter,
@@ -84,9 +84,12 @@ class Uread(fa.FastApp):
         Returns:
             nn.Module: The created model.
         """
-        encoder = create_body(models.resnet18)
-        features = num_features_model(encoder)
-        decoder = CharDecoder(input_size=features, vocab_size=self.vocab_size)
+        size = 512
+        encoder = create_cnn_model(models.resnet18, size)
+        # features = num_features_model(encoder)
+        decoder = CharDecoder(input_size=size, vocab_size=len(self.vocab))
+
+        print('encoder', encoder)
 
         return nn.Sequential(
             encoder,
