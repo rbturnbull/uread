@@ -27,7 +27,7 @@ console = Console()
 class Uread(fa.FastApp):
     def __init__(self):
         super().__init__()
-        self.vocab = list("_<abcdefghijklmnopqrstuvwxyz>")
+        self.vocab = list("_<abcdefghijklmnopqrstuvwxyz>") # The first char is the padding
 
     def dataloaders(
         self,
@@ -62,7 +62,7 @@ class Uread(fa.FastApp):
         else:
             splitter = RandomSplitter(validation_proportion)
 
-        datablock = DataBlock(
+        self.datablock = DataBlock(
             blocks=[ImageBlock, CharBlock(vocab=self.vocab)],
             get_x=PathColReader(column_name=image_column, base_dir=base_dir),
             get_y=ColReader(text_column),
@@ -71,10 +71,11 @@ class Uread(fa.FastApp):
         )
 
         # add normalisation
-        import pdb; pdb.set_trace()
 
-        dataloaders = datablock.dataloaders(df, bs=batch_size)
-
+        dataloaders = self.datablock.dataloaders(df, bs=batch_size)
+        
+        batch = dataloaders.one_batch()
+        print("Batch shapes:", batch[0].shape, batch[1].shape)
 
         return dataloaders
 
@@ -82,11 +83,13 @@ class Uread(fa.FastApp):
         self,
     ) -> nn.Module:
         """
-        Creates a deep learning model for the Pomona to use.
+        Creates a deep learning model for the app to use.
 
         Returns:
             nn.Module: The created model.
         """
+        import pdb; pdb.set_trace()
+
         size = 512
         encoder = create_cnn_model(models.resnet18, size)
         # features = num_features_model(encoder)
