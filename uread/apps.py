@@ -85,8 +85,6 @@ class Uread(fa.FastApp):
         Returns:
             nn.Module: The created model.
         """
-        import pdb; pdb.set_trace()
-
         size = 512
         encoder = create_cnn_model(models.resnet18, size)
         # features = num_features_model(encoder)
@@ -106,4 +104,4 @@ class Uread(fa.FastApp):
         return "accuracy"
 
     def loss_func(self):
-        return nn.NLLLoss()
+        return nn.CrossEntropyLoss()

@@ -40,7 +40,6 @@ class PadZero(DisplayedTransform):
         padded = torch.zeros( (self.seq_len,), dtype=x.dtype )
         padded[difference:] = x
         return TensorText(padded)
-        # return [0]*difference + x
 
     def decodes(self, object:TensorText):
         object[object != 0]
