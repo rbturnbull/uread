@@ -38,5 +38,5 @@ class CharDecoder(nn.Module):
         tensor, _ = self.rnn(repeated, (h_0, c_0))
         tensor = self.get_logits(tensor)
 
-        torch.swapaxes(tensor, 1, 2)
+        tensor = torch.swapaxes(tensor, 1, 2)
         return tensor

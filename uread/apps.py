@@ -5,7 +5,7 @@ from rich.console import Console
 
 from fastai.data.block import DataBlock
 from fastai.data.transforms import ColReader, ColSplitter, RandomSplitter
-from fastai.metrics import accuracy
+from fastai.metrics import accuracy_multi
 from fastai.vision.data import ImageBlock
 from fastai.vision.augment import Resize, ResizeMethod
 from fastai.callback.hook import num_features_model
@@ -90,6 +90,7 @@ class Uread(fa.FastApp):
         """
         size = 512
         encoder = create_cnn_model(models.resnet18, size)
+        self.fine_tune = True
         # features = num_features_model(encoder)
         decoder = CharDecoder(input_size=size, vocab_size=len(self.vocab))
 
@@ -100,11 +101,11 @@ class Uread(fa.FastApp):
             decoder,
         )
 
-    def metrics(self):
-        return [accuracy]
+    # def metrics(self):
+    #     return [accuracy_multi]
 
-    def monitor(self):
-        return "accuracy"
+    # def monitor(self):
+    #     return "accuracy_multi"
 
     def loss_func(self):
         return nn.CrossEntropyLoss()
