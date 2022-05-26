@@ -27,7 +27,7 @@ console = Console()
 class Uread(fa.FastApp):
     def __init__(self):
         super().__init__()
-        self.vocab = list("<abcdefghijklmnopqrstuvwxyz>")
+        self.vocab = list("_<abcdefghijklmnopqrstuvwxyz>") # The first char is the padding
 
     def dataloaders(
         self,
@@ -62,7 +62,7 @@ class Uread(fa.FastApp):
         else:
             splitter = RandomSplitter(validation_proportion)
 
-        datablock = DataBlock(
+        self.datablock = DataBlock(
             blocks=[ImageBlock, CharBlock(vocab=self.vocab)],
             get_x=PathColReader(column_name=image_column, base_dir=base_dir),
             get_y=ColReader(text_column),
@@ -72,8 +72,9 @@ class Uread(fa.FastApp):
 
         # add normalisation
 
-        dataloaders = datablock.dataloaders(df, bs=batch_size)
-        return dataloaders
+        self.dataloaders = self.datablock.dataloaders(df, bs=batch_size)
+
+        return self.dataloaders
 
     def model(
         self,
@@ -84,6 +85,8 @@ class Uread(fa.FastApp):
         Returns:
             nn.Module: The created model.
         """
+        import pdb; pdb.set_trace()
+
         size = 512
         encoder = create_cnn_model(models.resnet18, size)
         # features = num_features_model(encoder)
@@ -103,4 +106,4 @@ class Uread(fa.FastApp):
         return "accuracy"
 
     def loss_func(self):
-        return nn.CrossEntropyLoss()
+        return nn.NLLLoss()
