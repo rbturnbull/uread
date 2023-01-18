@@ -2,14 +2,16 @@ from pathlib import Path
 from torch import nn
 from fastai.data.core import DataLoaders
 from rich.console import Console
+from functools import partial
 
 from fastai.data.block import DataBlock
-from fastai.data.transforms import ColReader, ColSplitter, RandomSplitter
-from fastai.metrics import accuracy_multi
+from fastai.data.transforms import ColReader, ColSplitter, RandomSplitter, Normalize
+from fastai.metrics import accuracy_multi, accuracy
 from fastai.vision.data import ImageBlock
 from fastai.vision.augment import Resize, ResizeMethod
 from fastai.callback.hook import num_features_model
 from fastai.vision.learner import create_body, create_cnn_model
+from fastai.vision.core import imagenet_stats
 
 import pandas as pd
 import fastapp as fa
@@ -50,8 +52,11 @@ class Uread(fa.FastApp):
         width: int = fa.Param(default=224, help="The width to resize all the images to."),
         height: int = fa.Param(default=224, help="The height to resize all the images to."),
         resize_method:str = fa.Param(default="squish", help="The method to resize images."),
+        max_images:int = fa.Param(default=None, help="If set, then this is the maximum number of images used for training/validation."),
     ):
         df = pd.read_csv(csv)
+        if max_images:
+            df = df.sample(max_images, random_state=max_images)
 
         if not base_dir:
             base_dir = Path(csv).parent
@@ -68,9 +73,8 @@ class Uread(fa.FastApp):
             get_y=ColReader(text_column),
             splitter=splitter,
             item_tfms=Resize( (height, width), method=resize_method ),
+            batch_tfms=Normalize.from_stats(*imagenet_stats),
         )
-
-        # add normalisation
 
         dataloaders = self.datablock.dataloaders(df, bs=batch_size)
         
@@ -94,18 +98,16 @@ class Uread(fa.FastApp):
         # features = num_features_model(encoder)
         decoder = CharDecoder(input_size=size, vocab_size=len(self.vocab))
 
-        print('encoder', encoder)
-
         return nn.Sequential(
             encoder,
             decoder,
         )
 
-    # def metrics(self):
-    #     return [accuracy_multi]
+    def metrics(self):
+        return [partial(accuracy, axis=-2)]
 
-    # def monitor(self):
-    #     return "accuracy_multi"
+    def monitor(self):
+        return "accuracy"
 
     def loss_func(self):
         return nn.CrossEntropyLoss()

@@ -32,7 +32,7 @@ class CharDecoder(nn.Module):
         c_0 = torch.zeros( (1, batch_size, self.hidden_size), device=tensor.device )
         h_0 = torch.zeros_like(c_0)
         
-        seq_len = 72 # hack
+        seq_len = 32 # hack
         repeated = torch.unsqueeze(tensor, dim=1).expand((-1,seq_len,-1))
 
         tensor, _ = self.rnn(repeated, (h_0, c_0))
